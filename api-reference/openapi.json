@@ -72,6 +72,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Get wallet details",
@@ -154,6 +157,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Get all addresses for a wallet",
@@ -172,6 +178,16 @@
             "description": "Turnkey wallet ID",
             "schema": {
               "example": "wallet-abc123def456",
+              "type": "string"
+            }
+          },
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
               "type": "string"
             }
           }
@@ -246,6 +262,9 @@
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "api-key": []
           }
@@ -337,11 +356,486 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Get a specific address",
         "tags": [
           "Wallets"
+        ]
+      }
+    },
+    "/widget/swap": {
+      "post": {
+        "description": "Creates metadata configuration for a token swap application. Currently supports LFJ and Pangolin protocols. The generated metadata can be used to create mini-apps for token swaps on supported blockchain networks.",
+        "operationId": "MetadataController_generateSwapMetadata",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Parameters for generating swap metadata",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwapMetadataDto"
+              },
+              "examples": {
+                "LFJ Swap": {
+                  "value": {
+                    "protocol": "lfj",
+                    "chainName": "avalanche",
+                    "fromToken": "AVAX",
+                    "toToken": "JOE",
+                    "routerAddress": "0xb00D916688FEE4aB6646994104E1441446947fc9",
+                    "slippageTolerance": 0.5
+                  },
+                  "description": "Swap AVAX to JOE using LFJ protocol on Avalanche"
+                },
+                "Pangolin Swap": {
+                  "value": {
+                    "protocol": "pangolin",
+                    "chainName": "avalanche",
+                    "fromToken": "AVAX",
+                    "toToken": "PNG",
+                    "routerAddress": "0xb00D916688FEE4aB6646994104E1441446947fc9",
+                    "slippageTolerance": 0.5
+                  },
+                  "description": "Swap AVAX to PNG using Pangolin protocol on Avalanche"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Swap metadata generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Generated metadata object containing all swap configuration"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters provided",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "statusCode": {
+                      "type": "number",
+                      "example": 400
+                    },
+                    "message": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "error": {
+                      "type": "string",
+                      "example": "Bad Request"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions. Requires INTERNAL or INTEGRATOR scope (ADMIN scope also allowed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Failed to generate metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Generate metadata for Swap application",
+        "tags": [
+          "Widget"
+        ]
+      }
+    },
+    "/widget/crosschain-transfer": {
+      "post": {
+        "description": "Creates metadata configuration for transferring native tokens across different blockchain networks. Converts native currency from source chain to native currency on destination chain (e.g., AVAX → ETH, AVAX → MATIC). This is useful for creating mini-apps that enable users to send native tokens from one chain and receive native tokens on another chain.",
+        "operationId": "MetadataController_generateCrosschainTransferMetadata",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Parameters for generating crosschain native token transfer metadata",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrossChainAppDto"
+              },
+              "examples": {
+                "Transfer AVAX to Ethereum (receive ETH)": {
+                  "value": {
+                    "title": "Transfer AVAX to ETH",
+                    "description": "Transfer AVAX from Avalanche and receive ETH on Ethereum",
+                    "icon": "https://example.com/transfer-icon.png",
+                    "url": "https://example.com/transfer",
+                    "sourceChainId": 43114,
+                    "destinationChainId": 1,
+                    "address": "0xb00D916688FEE4aB6646994104E1441446947fc9"
+                  },
+                  "description": "Send AVAX from Avalanche (43114) and receive ETH on Ethereum (1)"
+                },
+                "Transfer AVAX to Polygon (receive MATIC)": {
+                  "value": {
+                    "title": "Transfer AVAX to MATIC",
+                    "description": "Transfer AVAX from Avalanche and receive MATIC on Polygon",
+                    "icon": "https://example.com/transfer-icon.png",
+                    "url": "https://example.com/transfer-avax",
+                    "sourceChainId": 43114,
+                    "destinationChainId": 137,
+                    "address": "0xb00D916688FEE4aB6646994104E1441446947fc9"
+                  },
+                  "description": "Send AVAX from Avalanche (43114) and receive MATIC on Polygon (137)"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Crosschain transfer metadata generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Generated metadata for crosschain transfer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters provided (e.g., invalid chain IDs, missing required fields)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions. Requires INTERNAL or INTEGRATOR scope (ADMIN scope also allowed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Failed to generate metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Generate metadata for Crosschain Transfer application",
+        "tags": [
+          "Widget"
+        ]
+      }
+    },
+    "/widget/transfer-native": {
+      "post": {
+        "description": "Creates metadata configuration for transferring native tokens (like AVAX, ETH, MATIC) on a single blockchain network. This endpoint generates metadata for simple native token transfers within the same chain, useful for creating mini-apps that enable users to send native tokens to specific addresses.",
+        "operationId": "MetadataController_generateTransferNativeMetadata",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Parameters for generating native token transfer metadata",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferMetadataDto"
+              },
+              "examples": {
+                "AVAX Transfer on Avalanche": {
+                  "value": {
+                    "title": "Transfer AVAX",
+                    "description": "Send AVAX to another address on Avalanche network",
+                    "icon": "https://example.com/avax-icon.png",
+                    "url": "https://example.com/transfer",
+                    "address": "0xb00D916688FEE4aB6646994104E1441446947fc9",
+                    "chainId": 43114
+                  },
+                  "description": "Transfer AVAX on Avalanche C-Chain (43114)"
+                },
+                "ETH Transfer on Ethereum": {
+                  "value": {
+                    "title": "Transfer ETH",
+                    "description": "Send ETH to another address on Ethereum network",
+                    "icon": "https://example.com/eth-icon.png",
+                    "url": "https://example.com/transfer-eth",
+                    "address": "0xb00D916688FEE4aB6646994104E1441446947fc9",
+                    "chainId": 1
+                  },
+                  "description": "Transfer ETH on Ethereum mainnet (1)"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Native token transfer metadata generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Generated metadata for native token transfer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters provided (e.g., invalid chain ID, invalid address format)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions. Requires INTERNAL or INTEGRATOR scope (ADMIN scope also allowed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Failed to generate metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Generate metadata for Native Token Transfer application",
+        "tags": [
+          "Widget"
+        ]
+      }
+    },
+    "/widget/crosschain-bridge": {
+      "post": {
+        "description": "Creates metadata configuration for bridging assets between different blockchain networks. This endpoint generates metadata for cross-chain bridge operations, allowing users to move assets (tokens) from one blockchain to another. Useful for creating mini-apps that enable cross-chain asset transfers.",
+        "operationId": "MetadataController_generateCrosschainBridgeMetadata",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Parameters for generating crosschain bridge metadata",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrossChainAppDto"
+              },
+              "examples": {
+                "Bridge from Avalanche to Arbitrum": {
+                  "value": {
+                    "title": "Bridge USDC",
+                    "description": "Bridge USDC from Avalanche to Arbitrum",
+                    "icon": "https://example.com/usdc-icon.png",
+                    "url": "https://example.com/bridge",
+                    "sourceChainId": 43114,
+                    "destinationChainId": 42161,
+                    "address": "0xb00D916688FEE4aB6646994104E1441446947fc9"
+                  },
+                  "description": "Bridge USDC from Avalanche (43114) to Arbitrum (42161)"
+                },
+                "Bridge from Ethereum to Polygon": {
+                  "value": {
+                    "title": "Bridge ETH",
+                    "description": "Bridge ETH from Ethereum to Polygon",
+                    "icon": "https://example.com/eth-icon.png",
+                    "url": "https://example.com/bridge-eth",
+                    "sourceChainId": 1,
+                    "destinationChainId": 137,
+                    "address": "0xb00D916688FEE4aB6646994104E1441446947fc9"
+                  },
+                  "description": "Bridge ETH from Ethereum (1) to Polygon (137)"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Crosschain bridge metadata generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "description": "Generated metadata for crosschain bridge operation"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid bridge parameters (e.g., invalid chain IDs, missing required fields)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing API key",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden - Insufficient permissions. Requires INTERNAL or INTEGRATOR scope (ADMIN scope also allowed)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error - Failed to generate bridge metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Generate metadata for Crosschain Bridge application",
+        "tags": [
+          "Widget"
         ]
       }
     },
@@ -370,7 +864,18 @@
               "type": "number",
               "enum": [
                 43114,
-                43113
+                43113,
+                1,
+                5,
+                11155111,
+                137,
+                80001,
+                42161,
+                421613,
+                8453,
+                84531,
+                10,
+                420
               ]
             }
           }
@@ -1058,11 +1563,237 @@
         ]
       }
     },
+    "/defi/swaps/quote": {
+      "post": {
+        "description": "Get a quote for swapping tokens on Uniswap V4. Returns expected output amount, price impact, and routing information.",
+        "operationId": "SwapsController_getQuote",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuoteRequestDto"
+              },
+              "examples": {
+                "quote-eth-usdc": {
+                  "summary": "Quote ETH to USDC",
+                  "description": "Get quote for swapping 1 ETH to USDC on Ethereum mainnet",
+                  "value": {
+                    "tokenIn": "0x0000000000000000000000000000000000000000",
+                    "tokenOut": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "amountIn": "1000000000000000000",
+                    "chainId": 1,
+                    "allowMultihop": true
+                  }
+                },
+                "quote-sepolia-eth-usdc": {
+                  "summary": "Quote ETH to USDC on Sepolia",
+                  "description": "Get quote for swapping 0.01 ETH to USDC on Sepolia testnet",
+                  "value": {
+                    "tokenIn": "0x0000000000000000000000000000000000000000",
+                    "tokenOut": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+                    "amountIn": "10000000000000000",
+                    "chainId": 11155111,
+                    "allowMultihop": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Quote retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuoteResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or chain not supported"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get swap quote",
+        "tags": [
+          "Defi"
+        ]
+      }
+    },
+    "/defi/swaps/prepare": {
+      "post": {
+        "description": "\n      Prepares a swap transaction without executing it. Returns serialized transaction data\n      that can be used with the /deposit/uniswap/swap endpoint to execute with Turnkey.\n\n      **Important:** This endpoint only PREPARES the transaction. To actually execute the swap,\n      you must use the /deposit/uniswap/swap endpoint which will sign and broadcast the transaction\n      using Turnkey wallets.\n    ",
+        "operationId": "SwapsController_prepareSwap",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SwapRequestDto"
+              },
+              "examples": {
+                "swap-eth-usdc": {
+                  "summary": "Prepare ETH to USDC swap",
+                  "description": "Prepare a swap transaction for 1 ETH to USDC",
+                  "value": {
+                    "userAddress": "0xb322E239E5A32724633A595b8f8657F9cbb307B2",
+                    "tokenIn": "0x0000000000000000000000000000000000000000",
+                    "tokenOut": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+                    "amountIn": "1000000000000000000",
+                    "amountOutMinimum": "1450000000",
+                    "chainId": 1
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Swap transaction prepared successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SwapResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request or chain not supported"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Prepare swap transaction",
+        "tags": [
+          "Defi"
+        ]
+      }
+    },
+    "/defi/swaps/chains": {
+      "get": {
+        "description": "Returns list of chains where Uniswap V4 swaps are supported",
+        "operationId": "SwapsController_getSupportedChains",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "List of supported chains",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "chains": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "chainId": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Ethereum Mainnet"
+                          },
+                          "supported": {
+                            "type": "boolean",
+                            "example": true
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Get supported chains for swaps",
+        "tags": [
+          "Defi"
+        ]
+      }
+    },
+    "/defi/swaps/health": {
+      "get": {
+        "description": "Check if the swaps service is operational",
+        "operationId": "SwapsController_healthCheck",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Service is healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "healthy"
+                    },
+                    "service": {
+                      "type": "string",
+                      "example": "swaps"
+                    },
+                    "timestamp": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Uniswap V4 Swaps service is running!"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Health check",
+        "tags": [
+          "Defi"
+        ]
+      }
+    },
     "/transactions/sign": {
       "post": {
         "description": "Signs a generic transaction using a wallet account that belongs to the integrator. The transaction must be pre-serialized. Only accounts owned by the integrator associated with the API key can be used.",
         "operationId": "TransactionsController_signTransaction",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "description": "Transaction signing parameters",
@@ -1116,6 +1847,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Sign a generic transaction",
@@ -1166,6 +1900,16 @@
               "example": 0,
               "type": "number"
             }
+          },
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1197,6 +1941,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "List signed transactions",
@@ -1209,7 +1956,18 @@
       "post": {
         "description": "Signs a native token transfer (AVAX, ETH, etc.) transaction. The transaction is built automatically and signed with Turnkey. Only accounts owned by the integrator can be used.",
         "operationId": "TransactionsController_signNativeTransfer",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "description": "Native transfer parameters",
@@ -1260,6 +2018,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Sign a native token transfer",
@@ -1272,7 +2033,18 @@
       "post": {
         "description": "Signs an ERC20 token transfer transaction. The transaction is built automatically and signed with Turnkey. Only accounts owned by the integrator can be used.",
         "operationId": "TransactionsController_signTokenTransfer",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "description": "Token transfer parameters",
@@ -1323,6 +2095,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Sign an ERC20 token transfer",
@@ -1343,6 +2118,16 @@
             "description": "Transaction ID",
             "schema": {
               "example": "tx-uuid-abc123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
               "type": "string"
             }
           }
@@ -1379,6 +2164,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Get signed transaction details",
@@ -1399,6 +2187,16 @@
               "example": "tx-uuid-abc123",
               "type": "string"
             }
+          },
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1416,6 +2214,9 @@
           }
         },
         "security": [
+          {
+            "api-key": []
+          },
           {
             "api-key": []
           }
@@ -1438,6 +2239,16 @@
             "description": "Transaction ID",
             "schema": {
               "example": "tx-uuid-abc123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
               "type": "string"
             }
           }
@@ -1488,6 +2299,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Broadcast a signed transaction",
@@ -1506,6 +2320,16 @@
             "description": "Transaction ID",
             "schema": {
               "example": "tx-uuid-abc123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
               "type": "string"
             }
           }
@@ -1542,6 +2366,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Get broadcast status",
@@ -1554,7 +2381,18 @@
       "post": {
         "description": "Broadcasts a raw signed transaction directly to the blockchain without saving it. Use this for transactions signed outside of this API.",
         "operationId": "TransactionsController_broadcastRawTransaction",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "description": "Raw transaction parameters",
@@ -1595,6 +2433,9 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Broadcast a raw signed transaction",
@@ -1615,6 +2456,16 @@
             "description": "Transaction ID",
             "schema": {
               "example": "tx-uuid-abc123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
               "type": "string"
             }
           }
@@ -1665,9 +2516,82 @@
         "security": [
           {
             "api-key": []
+          },
+          {
+            "api-key": []
           }
         ],
         "summary": "Retry broadcasting a failed transaction",
+        "tags": [
+          "Transactions"
+        ]
+      }
+    },
+    "/transactions/cancel-pending": {
+      "post": {
+        "description": "Cancels all pending transactions for a wallet address by broadcasting replacement transactions with higher gas prices. This is useful when you hit the maximum pending transactions limit (10) or need to clear stuck transactions. Only wallets owned by the integrator can be used.",
+        "operationId": "TransactionsController_cancelPendingTransactions",
+        "parameters": [
+          {
+            "name": "integratorId",
+            "required": false,
+            "in": "query",
+            "description": "Integrator ID (required for ADMIN/INTERNAL scope)",
+            "schema": {
+              "example": "uuid-integrator-id",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "description": "Cancellation parameters",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelPendingTransactionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponseDto"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/CancelPendingTransactionsResponseDto"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request - Invalid parameters or no pending transactions found"
+          },
+          "403": {
+            "description": "Forbidden - Wallet does not belong to this integrator"
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          },
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Cancel pending blockchain transactions",
         "tags": [
           "Transactions"
         ]
@@ -1828,7 +2752,18 @@
           "apiKey": {
             "type": "string",
             "example": "sk_client_v1_a1b2c3d4e5f6...",
-            "description": "Primary API key (returned only on creation)."
+            "description": "API key for authenticating requests (returned ONLY ONCE on creation). Store this securely - it will never be shown again."
+          },
+          "turnkeyApiKey": {
+            "type": "string",
+            "example": "-----BEGIN PRIVATE KEY-----\nMIGEAgEAMBAGByqGSM49AgEGBS...\n-----END PRIVATE KEY-----",
+            "description": "DEPRECATED: Turnkey root API key private key. This field is no longer returned. Use apiKey instead.",
+            "deprecated": true
+          },
+          "turnkeyApiKeyId": {
+            "type": "string",
+            "example": "api-key-abc123def456",
+            "description": "Turnkey API key ID (for reference)."
           },
           "primaryAddress": {
             "type": "string",
@@ -1862,6 +2797,196 @@
         "required": [
           "name",
           "email"
+        ]
+      },
+      "ApiKeyListItemDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "description": "API key ID"
+          },
+          "name": {
+            "type": "string",
+            "example": "Production API Key",
+            "description": "Name of the API key"
+          },
+          "description": {
+            "type": "object",
+            "example": "API key for production environment",
+            "description": "Description of the API key",
+            "nullable": true
+          },
+          "prefix": {
+            "type": "string",
+            "example": "sk_client_v1",
+            "description": "API key prefix"
+          },
+          "lastFour": {
+            "type": "string",
+            "example": "y5z6",
+            "description": "Last 4 characters of the API key"
+          },
+          "scopes": {
+            "example": [
+              "INTEGRATOR"
+            ],
+            "description": "Scopes assigned to this API key",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "active": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether the API key is active"
+          },
+          "expiresAt": {
+            "type": "object",
+            "example": "2026-01-11T12:00:00.000Z",
+            "description": "Expiration date of the API key",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-01-11T12:00:00.000Z",
+            "description": "Creation date of the API key"
+          },
+          "updatedAt": {
+            "type": "object",
+            "example": "2025-01-11T12:00:00.000Z",
+            "description": "Last update date of the API key",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "prefix",
+          "lastFour",
+          "scopes",
+          "active",
+          "expiresAt",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateApiKeyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "description": "API key ID"
+          },
+          "name": {
+            "type": "string",
+            "example": "Production API Key",
+            "description": "Name of the API key"
+          },
+          "description": {
+            "type": "object",
+            "example": "API key for production environment",
+            "description": "Description of the API key",
+            "nullable": true
+          },
+          "key": {
+            "type": "string",
+            "example": "sk_client_v1_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6",
+            "description": "⚠️ Full API key (only shown once on creation)"
+          },
+          "scopes": {
+            "example": [
+              "INTEGRATOR"
+            ],
+            "description": "Scopes assigned to this API key",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "active": {
+            "type": "boolean",
+            "example": true,
+            "description": "Whether the API key is active"
+          },
+          "expiresAt": {
+            "type": "object",
+            "example": "2026-01-11T12:00:00.000Z",
+            "description": "Expiration date of the API key",
+            "nullable": true
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-01-11T12:00:00.000Z",
+            "description": "Creation date of the API key"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "key",
+          "scopes",
+          "active",
+          "expiresAt",
+          "createdAt"
+        ]
+      },
+      "CreateApiKeyRequestDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Production API Key",
+            "description": "Name for the API key",
+            "maxLength": 255
+          },
+          "description": {
+            "type": "string",
+            "example": "API key for production environment",
+            "description": "Description of the API key usage"
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "RevokeApiKeyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+            "description": "ID of the revoked API key"
+          },
+          "name": {
+            "type": "string",
+            "example": "Production API Key",
+            "description": "Name of the revoked API key"
+          },
+          "message": {
+            "type": "string",
+            "example": "API key revoked successfully",
+            "description": "Revocation message"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "type": "string",
+            "example": "2025-01-11T12:00:00.000Z",
+            "description": "Date when the key was revoked"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "message",
+          "revokedAt"
         ]
       },
       "WalletAddressDto": {
@@ -1993,7 +3118,7 @@
           },
           "addressFormats": {
             "type": "array",
-            "description": "Array of address formats to create (simplified, auto-derives paths)",
+            "description": "Array of address formats to create (simplified, auto-derives paths). Defaults to [ADDRESS_FORMAT_ETHEREUM] if neither accounts nor addressFormats are provided.",
             "example": [
               "ADDRESS_FORMAT_ETHEREUM",
               "ADDRESS_FORMAT_SOLANA"
@@ -2009,7 +3134,7 @@
           },
           "mnemonicLength": {
             "type": "number",
-            "description": "Mnemonic length for the wallet seed phrase (12 or 24)",
+            "description": "Mnemonic length for the wallet seed phrase (12 or 24). Defaults to 12 if not provided.",
             "example": 12,
             "minimum": 12,
             "maximum": 24
@@ -3564,7 +4689,18 @@
             "example": 43114,
             "enum": [
               43114,
-              43113
+              43113,
+              1,
+              5,
+              11155111,
+              137,
+              80001,
+              42161,
+              421613,
+              8453,
+              84531,
+              10,
+              420
             ]
           }
         },
@@ -3607,6 +4743,159 @@
           "message",
           "serializedTransaction",
           "gasEstimation"
+        ]
+      },
+      "QuoteRequestDto": {
+        "type": "object",
+        "properties": {
+          "tokenIn": {
+            "type": "string",
+            "description": "Input token address (use 0x0000000000000000000000000000000000000000 for native token)",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "tokenOut": {
+            "type": "string",
+            "description": "Output token address",
+            "example": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+          },
+          "amountIn": {
+            "type": "string",
+            "description": "Amount to swap (in token decimals)",
+            "example": "1000000000000000000"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID",
+            "example": 1
+          },
+          "allowMultihop": {
+            "type": "boolean",
+            "description": "Allow multi-hop swaps (default: true)",
+            "example": true
+          }
+        },
+        "required": [
+          "tokenIn",
+          "tokenOut",
+          "amountIn",
+          "chainId"
+        ]
+      },
+      "QuoteResponseDto": {
+        "type": "object",
+        "properties": {
+          "amountOut": {
+            "type": "string",
+            "description": "Expected output amount",
+            "example": "1500000000"
+          },
+          "priceImpact": {
+            "type": "string",
+            "description": "Price impact percentage",
+            "example": "0.5"
+          },
+          "route": {
+            "type": "object",
+            "description": "Swap route information"
+          },
+          "estimatedGas": {
+            "type": "string",
+            "description": "Estimated gas cost",
+            "example": "150000"
+          }
+        },
+        "required": [
+          "amountOut",
+          "priceImpact",
+          "route",
+          "estimatedGas"
+        ]
+      },
+      "SwapRequestDto": {
+        "type": "object",
+        "properties": {
+          "userAddress": {
+            "type": "string",
+            "description": "User wallet address",
+            "example": "0xb322E239E5A32724633A595b8f8657F9cbb307B2"
+          },
+          "tokenIn": {
+            "type": "string",
+            "description": "Input token address (use 0x0000000000000000000000000000000000000000 for native token)",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "tokenOut": {
+            "type": "string",
+            "description": "Output token address",
+            "example": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+          },
+          "amountIn": {
+            "type": "string",
+            "description": "Amount to swap (in token decimals)",
+            "example": "1000000000000000000"
+          },
+          "amountOutMinimum": {
+            "type": "string",
+            "description": "Minimum amount out (slippage protection)",
+            "example": "1450000000"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID",
+            "example": 1
+          },
+          "deadline": {
+            "type": "number",
+            "description": "Deadline timestamp (optional, defaults to 20 minutes from now)",
+            "example": 1234567890
+          }
+        },
+        "required": [
+          "userAddress",
+          "tokenIn",
+          "tokenOut",
+          "amountIn",
+          "amountOutMinimum",
+          "chainId"
+        ]
+      },
+      "SwapResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Success status",
+            "example": true
+          },
+          "serializedTransaction": {
+            "type": "string",
+            "description": "Serialized transaction data"
+          },
+          "gasEstimation": {
+            "type": "object",
+            "description": "Gas estimation"
+          },
+          "expectedAmountOut": {
+            "type": "string",
+            "description": "Expected output amount",
+            "example": "1500000000"
+          },
+          "approvalTransaction": {
+            "type": "string",
+            "description": "Approval transaction if needed"
+          },
+          "message": {
+            "type": "string",
+            "description": "Response message",
+            "example": "Swap transaction prepared successfully"
+          }
+        },
+        "required": [
+          "success",
+          "serializedTransaction",
+          "gasEstimation",
+          "expectedAmountOut",
+          "message"
         ]
       },
       "SignedTransactionResponseDto": {
@@ -3705,6 +4994,11 @@
               "TRANSACTION_TYPE_TRON"
             ],
             "example": "TRANSACTION_TYPE_ETHEREUM"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID where the transaction will be executed",
+            "example": 11155111
           }
         },
         "required": [
@@ -3905,37 +5199,395 @@
           "transactionId": {
             "type": "string",
             "description": "Transaction ID",
-            "example": "tx-uuid-abc123"
-          },
-          "txHash": {
-            "type": "string",
-            "description": "Transaction hash (if broadcasted)",
-            "example": "0x789..."
+            "example": "tx-123e4567-e89b-12d3-a456-426614174000"
           },
           "status": {
             "type": "string",
-            "description": "Status",
-            "example": "broadcasted"
+            "description": "Current status of the transaction",
+            "enum": [
+              "pending",
+              "broadcasted",
+              "confirmed",
+              "failed",
+              "expired"
+            ],
+            "example": "confirmed"
           },
-          "broadcastedAt": {
+          "transactionHash": {
             "type": "string",
-            "description": "Broadcast timestamp",
-            "example": "2024-01-01T12:10:00Z"
-          },
-          "confirmedAt": {
-            "type": "string",
-            "description": "Confirmation timestamp",
-            "example": "2024-01-01T12:10:15Z"
+            "description": "Transaction hash on the blockchain",
+            "example": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef"
           },
           "blockNumber": {
-            "type": "number",
-            "description": "Block number",
-            "example": 12345678
+            "type": "string",
+            "description": "Block number where the transaction was confirmed",
+            "example": "12345678"
           },
           "confirmations": {
             "type": "number",
             "description": "Number of confirmations",
-            "example": 3
+            "example": 12
+          }
+        },
+        "required": [
+          "transactionId",
+          "status"
+        ]
+      },
+      "CancelPendingTransactionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Wallet address",
+            "example": "0xaDA2782Ed2338813746df68788AFDD4a9775A34b"
+          },
+          "pendingCount": {
+            "type": "number",
+            "description": "Number of pending transactions found",
+            "example": 5
+          },
+          "cancelledCount": {
+            "type": "number",
+            "description": "Number of transactions cancelled",
+            "example": 5
+          },
+          "cancellationTxHashes": {
+            "description": "Array of cancellation transaction hashes",
+            "example": [
+              "0x...",
+              "0x..."
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "details": {
+            "type": "array",
+            "description": "Details of each cancelled transaction"
+          }
+        },
+        "required": [
+          "address",
+          "pendingCount",
+          "cancelledCount",
+          "cancellationTxHashes",
+          "details"
+        ]
+      },
+      "CancelPendingTransactionsDto": {
+        "type": "object",
+        "properties": {
+          "address": {
+            "type": "string",
+            "description": "Wallet address to cancel pending transactions for",
+            "example": "0xaDA2782Ed2338813746df68788AFDD4a9775A34b"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID where the pending transactions are",
+            "example": 11155111
+          },
+          "gasPriceMultiplier": {
+            "type": "number",
+            "description": "Gas price multiplier for replacement transaction (default: 1.2 = 20% more)",
+            "example": 1.2
+          }
+        },
+        "required": [
+          "address",
+          "chainId"
+        ]
+      },
+      "DepositResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the operation was successful",
+            "example": true
+          },
+          "transactionHash": {
+            "type": "string",
+            "description": "\n      Transaction hash if autoBroadcast was true.\n      This is the hash of the transaction on the blockchain.\n      Use this to track the transaction status on block explorers.\n    ",
+            "example": "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+            "nullable": true
+          },
+          "signedTransaction": {
+            "type": "string",
+            "description": "\n      Signed transaction (hex string) if autoBroadcast was false.\n      Use this to manually broadcast the transaction later using the /transactions/broadcast/raw endpoint.\n    ",
+            "example": "0x02f8...",
+            "nullable": true
+          },
+          "approvalTransactionHash": {
+            "type": "string",
+            "description": "\n      Transaction hash of the approval transaction (if token approval was required and autoApprove was true).\n      Only present for ERC20 token deposits that required approval.\n    ",
+            "example": "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable message describing the result",
+            "example": "Deposit transaction signed and broadcasted successfully"
+          },
+          "gasEstimation": {
+            "type": "object",
+            "description": "Gas estimation for the transaction",
+            "example": {
+              "gasLimit": "300000",
+              "estimatedCost": "0.001"
+            }
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "Transaction ID for tracking purposes",
+            "example": "tx-123e4567-e89b-12d3-a456-426614174000"
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "gasEstimation"
+        ]
+      },
+      "DepositRequestDto": {
+        "type": "object",
+        "properties": {
+          "signWith": {
+            "type": "string",
+            "description": "\n      Account identifier to sign the transaction with.\n      Can be either:\n      - Turnkey Account ID (e.g., \"account-123\")\n      - Ethereum address (e.g., \"0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb\")\n      \n      **Important:** The account must belong to the integrator making the request.\n    ",
+            "example": "account-123"
+          },
+          "tokenAddress": {
+            "type": "string",
+            "description": "\n      Token address to deposit.\n      - For native tokens (AVAX, ETH): Use \"0x0000000000000000000000000000000000000000\" or \"avax\"\n      - For ERC20 tokens: Use the contract address (e.g., USDC on Avalanche: \"0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E\")\n    ",
+            "example": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"
+          },
+          "amount": {
+            "type": "string",
+            "description": "\n      Amount to deposit in token units (not wei).\n      Use decimal format (e.g., \"100.5\" for 100.5 USDC).\n      The amount will be automatically converted to the correct decimals for the token.\n    ",
+            "example": "100.5"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "\n      Chain ID where the deposit will be executed.\n      \n      **Supported Mainnets (always enabled):**\n      - 43114: Avalanche Mainnet\n      - 1: Ethereum Mainnet\n      - 137: Polygon Mainnet\n      - 42161: Arbitrum One\n      - 8453: Base Mainnet\n      - 10: Optimism Mainnet\n      \n      **Supported Testnets (enabled if ENABLE_TESTNETS=true):**\n      - 43113: Avalanche Fuji Testnet\n      - 5: Ethereum Goerli Testnet\n      - 11155111: Ethereum Sepolia Testnet\n      - 80001: Polygon Mumbai Testnet\n      - 421613: Arbitrum Goerli Testnet\n      - 84531: Base Goerli Testnet\n      - 420: Optimism Goerli Testnet\n      \n      **Note:** Testnets are controlled by the `ENABLE_TESTNETS` environment variable.\n      By default, testnets are enabled in development/staging and disabled in production.\n      \n      **Validation:** This chain must be supported by AAVE SDK. The validation happens before any external API calls.\n    ",
+            "example": 43114,
+            "enum": [
+              43114,
+              43113,
+              1,
+              5,
+              11155111,
+              137,
+              80001,
+              42161,
+              421613,
+              8453,
+              84531,
+              10,
+              420
+            ]
+          },
+          "autoApprove": {
+            "type": "boolean",
+            "description": "\n      Automatically approve token spending if required (for ERC20 tokens).\n      If true and approval is needed, the approval transaction will be signed and broadcasted automatically.\n      Default: true\n      \n      **Note:** For native tokens (AVAX, ETH), this parameter is ignored.\n    ",
+            "example": true,
+            "default": true
+          },
+          "autoBroadcast": {
+            "type": "boolean",
+            "description": "\n      Automatically broadcast the signed transaction to the blockchain.\n      - If true: Transaction is signed and immediately broadcasted. Returns transactionHash.\n      - If false: Transaction is signed but not broadcasted. Returns signedTransaction for manual broadcast.\n      \n      Default: false\n      \n      **Use cases:**\n      - autoBroadcast=true: For automated deposits where you want immediate execution\n      - autoBroadcast=false: For manual review before broadcasting or batch operations\n    ",
+            "example": false,
+            "default": false
+          }
+        },
+        "required": [
+          "signWith",
+          "tokenAddress",
+          "amount",
+          "chainId"
+        ]
+      },
+      "WithdrawRequestDto": {
+        "type": "object",
+        "properties": {
+          "signWith": {
+            "type": "string",
+            "description": "Account identifier to sign the transaction with",
+            "example": "account-123"
+          },
+          "tokenAddress": {
+            "type": "string",
+            "description": "Token address to withdraw",
+            "example": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Amount to withdraw in token units (decimal format)",
+            "example": "50"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "\n      Chain ID where the withdrawal will be executed.\n      \n      **Note:** This chain must be supported by AAVE SDK. The validation happens before any external API calls.\n    ",
+            "example": 43114,
+            "enum": [
+              43114,
+              43113,
+              1,
+              5,
+              11155111,
+              137,
+              80001,
+              42161,
+              421613,
+              8453,
+              84531,
+              10,
+              420
+            ]
+          },
+          "autoBroadcast": {
+            "type": "boolean",
+            "description": "Automatically broadcast the transaction",
+            "example": true,
+            "default": false
+          }
+        },
+        "required": [
+          "signWith",
+          "tokenAddress",
+          "amount",
+          "chainId"
+        ]
+      },
+      "SwapExecutionResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Success status",
+            "example": true
+          },
+          "transactionHash": {
+            "type": "string",
+            "description": "Transaction hash (if broadcasted)",
+            "example": "0x123..."
+          },
+          "signedTransaction": {
+            "type": "string",
+            "description": "Signed transaction (if not broadcasted)"
+          },
+          "approvalTransactionHash": {
+            "type": "string",
+            "description": "Approval transaction hash (if approval was needed)"
+          },
+          "message": {
+            "type": "string",
+            "description": "Response message",
+            "example": "Swap transaction signed and broadcasted successfully"
+          },
+          "gasEstimation": {
+            "type": "object",
+            "description": "Gas estimation"
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "Transaction ID for status tracking",
+            "example": "tx-123e4567-e89b-12d3-a456-426614174000"
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "gasEstimation"
+        ]
+      },
+      "SwapExecutionDto": {
+        "type": "object",
+        "properties": {
+          "signWith": {
+            "type": "string",
+            "description": "Wallet account ID or address to sign the transaction with",
+            "example": "account-123"
+          },
+          "tokenIn": {
+            "type": "string",
+            "description": "Input token address (use 0x0000000000000000000000000000000000000000 for native token)",
+            "example": "0x0000000000000000000000000000000000000000"
+          },
+          "tokenOut": {
+            "type": "string",
+            "description": "Output token address",
+            "example": "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48"
+          },
+          "amountIn": {
+            "type": "string",
+            "description": "Amount to swap (in token decimals, as string)",
+            "example": "1000000000000000000"
+          },
+          "amountOutMinimum": {
+            "type": "string",
+            "description": "Minimum amount out (slippage protection)",
+            "example": "1450000000"
+          },
+          "chainId": {
+            "type": "number",
+            "description": "Chain ID",
+            "example": 1
+          },
+          "autoApprove": {
+            "type": "boolean",
+            "description": "Automatically approve token if needed (default: true)",
+            "example": true
+          },
+          "autoBroadcast": {
+            "type": "boolean",
+            "description": "Automatically broadcast the transaction after signing (default: true)",
+            "example": true
+          },
+          "deadline": {
+            "type": "number",
+            "description": "Deadline timestamp (optional, defaults to 20 minutes from now)",
+            "example": 1234567890
+          }
+        },
+        "required": [
+          "signWith",
+          "tokenIn",
+          "tokenOut",
+          "amountIn",
+          "amountOutMinimum",
+          "chainId"
+        ]
+      },
+      "SwapStatusResponseDto": {
+        "type": "object",
+        "properties": {
+          "transactionId": {
+            "type": "string",
+            "description": "Transaction ID",
+            "example": "tx-123e4567-e89b-12d3-a456-426614174000"
+          },
+          "status": {
+            "type": "string",
+            "description": "Transaction status",
+            "example": "confirmed"
+          },
+          "transactionHash": {
+            "type": "string",
+            "description": "Transaction hash",
+            "example": "0x123..."
+          },
+          "blockNumber": {
+            "type": "string",
+            "description": "Block number",
+            "example": "12345678"
+          },
+          "confirmations": {
+            "type": "number",
+            "description": "Number of confirmations",
+            "example": 12
           }
         },
         "required": [
