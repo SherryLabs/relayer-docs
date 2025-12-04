@@ -22,7 +22,9 @@
             "pages": [
               "documentation/index",
               "documentation/authentication",
-              "documentation/quickstart"
+              "documentation/quickstart",
+              "documentation/metadata",
+              "documentation/integrators"
             ]
           }
         ]
