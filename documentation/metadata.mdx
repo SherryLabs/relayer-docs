@@ -7,7 +7,7 @@ description: Learn about metadata and how to work with it
 
 # Metadata Validation
 
-Validation ensures your mini-app is correctly structured and prevents runtime errors.
+Validation ensures your widget is correctly structured and prevents runtime errors.
 
 ## Validation Functions
 
@@ -19,7 +19,7 @@ Takes a `Metadata` object, validates it completely, and returns a processed `Val
 
 - **Validates**: Structure, action types, parameters, chains, ABI compatibility
 - **Processes**: Infers parameter types from ABI, adds validation metadata
-- **Throws**: `SherryValidationError` or `InvalidMetadataError` if validation fails
+- **Throws**: `RelayerValidationError` or `InvalidMetadataError` if validation fails
 - **Returns**: `ValidatedMetadata` with additional processed information
 
 ```typescript
@@ -29,7 +29,7 @@ const metadata: Metadata = {
   url: 'https://myapp.example',
   icon: 'https://example.com/icon.png',
   title: 'My Trigger',
-  description: 'An awesome Web3 mini-app',
+  description: 'An awesome Web3 widget',
   actions: [
     {
       type: 'blockchain',
@@ -53,7 +53,7 @@ const metadata: Metadata = {
 try {
   const validatedMetadata = createMetadata(metadata);
   console.log('✅ Metadata is valid and processed!');
-  // Use validatedMetadata for your mini-app
+  // Use validatedMetadata for your widget
 } catch (error) {
   console.error('❌ Validation failed:', error.message);
   // Handle validation errors
@@ -383,14 +383,6 @@ if (!result.isValid) {
 
 ## Integration with Development Tools
 
-### Sherry Debugger
-
-The [Sherry Debugger](https://app.sherry.social/debugger) provides visual validation:
-
-1. **URL Mode**: Test your deployed endpoint
-2. **JSON Mode**: Paste metadata JSON directly
-3. **TypeScript Mode**: Validate your metadata code
-
 ### IDE Integration
 
 ```typescript
@@ -434,5 +426,5 @@ describe('Metadata Validation', () => {
 
 ---
 
-Proper validation ensures your mini-apps work reliably across all Sherry platforms and provides clear feedback during development. Always validate your metadata before deployment!
+Proper validation ensures your widgets work reliably across all Relayer platforms and provides clear feedback during development. Always validate your metadata before deployment!
 
