@@ -3572,7 +3572,7 @@
     },
     "/action/builders/crosschain-transfer": {
       "post": {
-        "description": "Creates metadata configuration for transferring native tokens across different blockchain networks. Converts native currency from source chain to native currency on destination chain (e.g., AVAX → ETH, AVAX → MATIC). This is useful for creating mini-apps that enable users to send native tokens from one chain and receive native tokens on another chain.",
+        "description": "Creates metadata configuration for transferring native tokens across different blockchain networks. Converts native currency from source chain to native currency on destination chain (e.g., AVAX \u2192 ETH, AVAX \u2192 MATIC). This is useful for creating mini-apps that enable users to send native tokens from one chain and receive native tokens on another chain.",
         "operationId": "MetadataController_generateCrosschainTransferMetadata",
         "parameters": [],
         "requestBody": {
@@ -4897,7 +4897,7 @@
     },
     "/protocols/swap/uniswap/execute/swap": {
       "post": {
-        "description": "\n      Executes a token swap on Uniswap V4 protocol using Turnkey wallet for signing.\n      The transaction is automatically signed and optionally broadcasted to the blockchain.\n\n      **Key Features:**\n      - Supports both native tokens (ETH, AVAX) and ERC20 tokens\n      - Automatically handles token approval if required (for ERC20 tokens)\n      - Uses Turnkey for secure transaction signing\n      - Optional automatic broadcasting to blockchain\n      - Slippage protection via amountOutMinimum\n\n      **Flow:**\n      1. If ERC20 token and approval needed → Signs and broadcasts approval transaction\n      2. Signs the swap transaction with Turnkey\n      3. Optionally broadcasts the transaction (if autoBroadcast=true)\n\n      **Note:** The `signWith` parameter must be an account ID or address that belongs to the integrator.\n    ",
+        "description": "\n      Executes a token swap on Uniswap V4 protocol using Turnkey wallet for signing.\n      The transaction is automatically signed and optionally broadcasted to the blockchain.\n\n      **Key Features:**\n      - Supports both native tokens (ETH, AVAX) and ERC20 tokens\n      - Automatically handles token approval if required (for ERC20 tokens)\n      - Uses Turnkey for secure transaction signing\n      - Optional automatic broadcasting to blockchain\n      - Slippage protection via amountOutMinimum\n\n      **Flow:**\n      1. If ERC20 token and approval needed \u2192 Signs and broadcasts approval transaction\n      2. Signs the swap transaction with Turnkey\n      3. Optionally broadcasts the transaction (if autoBroadcast=true)\n\n      **Note:** The `signWith` parameter must be an account ID or address that belongs to the integrator.\n    ",
         "operationId": "UniswapSwapController_executeSwap",
         "parameters": [
           {
@@ -5004,13 +5004,6 @@
           },
           "400": {
             "description": "Bad Request - Invalid input, insufficient balance, or invalid token addresses",
-            "schema": {
-              "example": {
-                "success": false,
-                "message": "Insufficient ETH balance for swap",
-                "statusCode": 400
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5021,13 +5014,6 @@
           },
           "403": {
             "description": "Forbidden - Account does not belong to this integrator",
-            "schema": {
-              "example": {
-                "success": false,
-                "message": "Account does not belong to this integrator",
-                "statusCode": 403
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5038,13 +5024,6 @@
           },
           "500": {
             "description": "Internal Server Error - Failed to execute swap",
-            "schema": {
-              "example": {
-                "success": false,
-                "message": "Failed to execute swap transaction",
-                "statusCode": 500
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -5118,13 +5097,6 @@
           },
           "404": {
             "description": "Transaction not found",
-            "schema": {
-              "example": {
-                "success": false,
-                "message": "Transaction tx-123e4567-e89b-12d3-a456-426614174000 not found",
-                "statusCode": 404
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6233,7 +6205,7 @@
     },
     "/protocols/lending/aave/execute/supply": {
       "post": {
-        "description": "\n      Deposits assets (native tokens or ERC20 tokens like USDC) to the AAVE lending protocol.\n      The transaction is automatically signed using the Turnkey wallet and optionally broadcasted to the blockchain.\n      \n      **Key Features:**\n      - Supports both native tokens (AVAX, ETH) and ERC20 tokens (USDC, USDT, etc.)\n      - Automatically handles token approval if required (for ERC20 tokens)\n      - Uses Turnkey for secure transaction signing\n      - Optional automatic broadcasting to blockchain\n      \n      **Flow:**\n      1. If ERC20 token and approval needed → Signs and broadcasts approval transaction\n      2. Signs the deposit transaction with Turnkey\n      3. Optionally broadcasts the transaction (if autoBroadcast=true)\n      \n      **Note:** The `signWith` parameter must be an account ID or address that belongs to the integrator.\n    ",
+        "description": "\n      Deposits assets (native tokens or ERC20 tokens like USDC) to the AAVE lending protocol.\n      The transaction is automatically signed using the Turnkey wallet and optionally broadcasted to the blockchain.\n      \n      **Key Features:**\n      - Supports both native tokens (AVAX, ETH) and ERC20 tokens (USDC, USDT, etc.)\n      - Automatically handles token approval if required (for ERC20 tokens)\n      - Uses Turnkey for secure transaction signing\n      - Optional automatic broadcasting to blockchain\n      \n      **Flow:**\n      1. If ERC20 token and approval needed \u2192 Signs and broadcasts approval transaction\n      2. Signs the deposit transaction with Turnkey\n      3. Optionally broadcasts the transaction (if autoBroadcast=true)\n      \n      **Note:** The `signWith` parameter must be an account ID or address that belongs to the integrator.\n    ",
         "operationId": "AaveDepositController_deposit",
         "parameters": [
           {
@@ -6320,13 +6292,6 @@
           },
           "400": {
             "description": "Bad Request - Invalid input, insufficient balance, or invalid token address",
-            "schema": {
-              "example": {
-                "success": false,
-                "message": "Insufficient USDC balance for deposit",
-                "statusCode": 400
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6337,13 +6302,6 @@
           },
           "403": {
             "description": "Forbidden - Account does not belong to this integrator",
-            "schema": {
-              "example": {
-                "success": false,
-                "message": "Account does not belong to this integrator",
-                "statusCode": 403
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6354,13 +6312,6 @@
           },
           "500": {
             "description": "Internal Server Error - Failed to prepare or sign transaction",
-            "schema": {
-              "example": {
-                "success": false,
-                "message": "Failed to prepare deposit transaction",
-                "statusCode": 500
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -6540,13 +6491,6 @@
           },
           "404": {
             "description": "Transaction not found",
-            "schema": {
-              "example": {
-                "success": false,
-                "message": "Transaction tx-123e4567-e89b-12d3-a456-426614174000 not found",
-                "statusCode": 404
-              }
-            },
             "content": {
               "application/json": {
                 "schema": {
@@ -7306,7 +7250,7 @@
     },
     "/payout/rails/external-accounts": {
       "post": {
-        "description": "Creates an external CLABE account for a customer in Mexico. The account is pre-configured with test data for Banco Santander México.",
+        "description": "Creates an external CLABE account for a customer in Mexico. The account is pre-configured with test data for Banco Santander M\u00e9xico.",
         "operationId": "BridgeController_createExternalAccountClabe",
         "parameters": [],
         "requestBody": {
@@ -7594,7 +7538,7 @@
             "description": "Bridge customer not found"
           }
         },
-        "summary": "Create an off-ramp transfer (crypto → fiat)",
+        "summary": "Create an off-ramp transfer (crypto \u2192 fiat)",
         "tags": [
           "Payout: Rails"
         ]
@@ -7625,7 +7569,7 @@
     },
     "/payout/accounts/setup/liquidation-address": {
       "post": {
-        "description": "Links a beneficiary's external bank account to a crypto chain for off-ramp. The returned address becomes the destination for the virtual account. Idempotent — returns existing if already configured for this beneficiary.",
+        "description": "Links a beneficiary's external bank account to a crypto chain for off-ramp. The returned address becomes the destination for the virtual account. Idempotent \u2014 returns existing if already configured for this beneficiary.",
         "operationId": "PaymentsController_setupLiquidationAddress",
         "parameters": [],
         "requestBody": {
@@ -7696,7 +7640,7 @@
     },
     "/payout/accounts/quote": {
       "post": {
-        "description": "Returns an estimated exchange rate and fee breakdown. Rates update every ~30 seconds — this is not a locked quote.",
+        "description": "Returns an estimated exchange rate and fee breakdown. Rates update every ~30 seconds \u2014 this is not a locked quote.",
         "operationId": "PaymentsController_getQuote",
         "parameters": [],
         "requestBody": {
@@ -7714,7 +7658,7 @@
             "description": "Quote returned successfully"
           }
         },
-        "summary": "Get a payment quote (MXN → USD)",
+        "summary": "Get a payment quote (MXN \u2192 USD)",
         "tags": [
           "Payout: Accounts"
         ]
@@ -7809,7 +7753,7 @@
     },
     "/payout/recipients": {
       "post": {
-        "description": "Creates a beneficiary record (name, address, owner type). No Bridge call — just our DB.",
+        "description": "Creates a beneficiary record (name, address, owner type). No Bridge call \u2014 just our DB.",
         "operationId": "BeneficiariesController_createBeneficiary",
         "parameters": [],
         "requestBody": {
@@ -7859,7 +7803,7 @@
     },
     "/payout/recipients/with-accounts": {
       "get": {
-        "description": "Returns all active beneficiaries for the authenticated integrator, each with their accounts embedded. Single query with join — no N+1.",
+        "description": "Returns all active beneficiaries for the authenticated integrator, each with their accounts embedded. Single query with join \u2014 no N+1.",
         "operationId": "BeneficiariesController_listBeneficiariesWithAccounts",
         "parameters": [],
         "responses": {
@@ -9282,7 +9226,7 @@
   },
   "info": {
     "title": "Relayer",
-    "description": "Relayer API — Kit-based crypto infrastructure for OTC exchange, wallet signing, payouts, and mini-app actions.",
+    "description": "Relayer API \u2014 Kit-based crypto infrastructure for OTC exchange, wallet signing, payouts, and mini-app actions.",
     "version": "1.0",
     "contact": {}
   },
@@ -11360,7 +11304,7 @@
           "address": {
             "type": "string",
             "example": "0x123abc456def789012345678901234567890abcd",
-            "description": "Ethereum wallet address (obligatorio, único)",
+            "description": "Ethereum wallet address (obligatorio, \u00fanico)",
             "maxLength": 42
           },
           "id_x": {
@@ -14017,14 +13961,14 @@
             "description": "Primary website of the business."
           },
           "identifying_information": {
-            "description": "Tax identification documents for the business (e.g. EIN, RFC). Image fields accept Supabase storage URLs — the backend converts them to base64 data-uri for Bridge API.",
+            "description": "Tax identification documents for the business (e.g. EIN, RFC). Image fields accept Supabase storage URLs \u2014 the backend converts them to base64 data-uri for Bridge API.",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/IdentifyingInformationItemDto"
             }
           },
           "business_formation_document": {
-            "description": "Business formation document (e.g. articles of incorporation, certificate of formation). Send Supabase storage URLs — the backend converts them to base64 data-uri for Bridge API.",
+            "description": "Business formation document (e.g. articles of incorporation, certificate of formation). Send Supabase storage URLs \u2014 the backend converts them to base64 data-uri for Bridge API.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/DocumentImageDto"
@@ -14032,7 +13976,7 @@
             ]
           },
           "proof_of_nature_of_business_document": {
-            "description": "Proof of nature of business document (e.g. business license, operating agreement). Required if primary_website is not provided. Send Supabase storage URLs — the backend converts them to base64 data-uri for Bridge API.",
+            "description": "Proof of nature of business document (e.g. business license, operating agreement). Required if primary_website is not provided. Send Supabase storage URLs \u2014 the backend converts them to base64 data-uri for Bridge API.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/DocumentImageDto"
@@ -14040,7 +13984,7 @@
             ]
           },
           "business_ownership_document": {
-            "description": "Business ownership document (e.g. ownership chart, cap table). Not required if a control person provides attested_ownership_structure_at. Send Supabase storage URLs — the backend converts them to base64 data-uri for Bridge API.",
+            "description": "Business ownership document (e.g. ownership chart, cap table). Not required if a control person provides attested_ownership_structure_at. Send Supabase storage URLs \u2014 the backend converts them to base64 data-uri for Bridge API.",
             "allOf": [
               {
                 "$ref": "#/components/schemas/DocumentImageDto"
@@ -14370,11 +14314,11 @@
           },
           "account_owner_name": {
             "type": "string",
-            "example": "Juan García"
+            "example": "Juan Garc\u00eda"
           },
           "bank_name": {
             "type": "string",
-            "example": "Banco Santander México"
+            "example": "Banco Santander M\u00e9xico"
           },
           "active": {
             "type": "boolean",
@@ -14397,7 +14341,7 @@
           },
           "last_name": {
             "type": "string",
-            "example": "García"
+            "example": "Garc\u00eda"
           },
           "account": {
             "$ref": "#/components/schemas/USAccountResponseDto"
@@ -14648,7 +14592,7 @@
           "customer_id": {
             "type": "string",
             "example": "e3b0c442-98fc-1c14-b39f-92d1282e8b7a",
-            "description": "Bridge customer ID (UUID) — required for CLABE/ACH endpoints"
+            "description": "Bridge customer ID (UUID) \u2014 required for CLABE/ACH endpoints"
           },
           "currency": {
             "type": "string",
@@ -14718,7 +14662,7 @@
           "has_ownership": {
             "type": "boolean",
             "example": true,
-            "description": "Indicates if person has ≥25% ownership"
+            "description": "Indicates if person has \u226525% ownership"
           },
           "has_control": {
             "type": "boolean",
@@ -15015,7 +14959,7 @@
           },
           "country": {
             "type": "string",
-            "description": "Country code (e.g. US, MX — normalized to ISO 3166 before sending to Bridge)",
+            "description": "Country code (e.g. US, MX \u2014 normalized to ISO 3166 before sending to Bridge)",
             "example": "US"
           }
         },
@@ -15130,7 +15074,7 @@
           "legal_name": {
             "type": "string",
             "description": "Legal name of the account holder (MX accounts)",
-            "example": "Juan García López"
+            "example": "Juan Garc\u00eda L\u00f3pez"
           },
           "rfc": {
             "type": "string",
