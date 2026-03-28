@@ -9,11 +9,11 @@ on:
       api_repo:
         description: 'API repository (owner/repo)'
         required: false
-        default: 'SherryLabs/sherry-api'
+        default: 'SherryLabs/relayer-api'
       branch:
         description: 'Branch to fetch from'
         required: false
-        default: 'main'
+        default: 'develop'
   repository_dispatch:
     types: [openapi-updated]
 
@@ -31,11 +31,11 @@ jobs:
         id: repo_info
         run: |
           if [ "${{ github.event_name }}" == "repository_dispatch" ]; then
-            echo "repo=${{ github.event.client_payload.api_repo || 'SherryLabs/sherry-api' }}" >> $GITHUB_OUTPUT
-            echo "branch=${{ github.event.client_payload.branch || 'main' }}" >> $GITHUB_OUTPUT
+            echo "repo=${{ github.event.client_payload.api_repo || 'SherryLabs/relayer-api' }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.event.client_payload.branch || 'develop' }}" >> $GITHUB_OUTPUT
           else
-            echo "repo=${{ github.event.inputs.api_repo || 'SherryLabs/sherry-api' }}" >> $GITHUB_OUTPUT
-            echo "branch=${{ github.event.inputs.branch || 'main' }}" >> $GITHUB_OUTPUT
+            echo "repo=${{ github.event.inputs.api_repo || 'SherryLabs/relayer-api' }}" >> $GITHUB_OUTPUT
+            echo "branch=${{ github.event.inputs.branch || 'develop' }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Download latest OpenAPI
@@ -45,27 +45,27 @@ jobs:
           echo "📥 Downloading OpenAPI from $API_REPO (branch: $BRANCH)"
           curl -H "Accept: application/vnd.github.v3.raw" \
             -L "https://api.github.com/repos/$API_REPO/contents/docs/openapi.json?ref=$BRANCH" \
-            -o openapi.json
-          
-          if [ ! -f "openapi.json" ] || [ ! -s "openapi.json" ]; then
+            -o api-reference/openapi.json
+
+          if [ ! -f "api-reference/openapi.json" ] || [ ! -s "api-reference/openapi.json" ]; then
             echo "❌ Error: Failed to download openapi.json"
             exit 1
           fi
-          
+
           echo "✅ OpenAPI downloaded successfully"
-          echo "📊 File size: $(ls -lh openapi.json | awk '{print $5}')"
+          echo "📊 File size: $(ls -lh api-reference/openapi.json | awk '{print $5}')"
 
       - name: Check for changes
         id: check_changes
         run: |
-          if git diff --quiet openapi.json; then
+          if git diff --quiet api-reference/openapi.json; then
             echo "changed=false" >> $GITHUB_OUTPUT
             echo "ℹ️ No changes detected in OpenAPI file"
           else
             echo "changed=true" >> $GITHUB_OUTPUT
             echo "✅ Changes detected in OpenAPI file"
             echo "📝 Changes:"
-            git diff --stat openapi.json || true
+            git diff --stat api-reference/openapi.json || true
           fi
 
       - name: Commit if changed
@@ -73,7 +73,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add openapi.json
+          git add api-reference/openapi.json
           git commit -m "chore: sync OpenAPI from API repo [skip ci]"
           git push
         env:
